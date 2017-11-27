@@ -5,8 +5,8 @@ window.addEventListener('DOMContentLoaded', () => {
     new Breakout({
         canvas: canvas,
         interval: 1000 / 60,
-        paddle: {width: 100,height: 10,color: '#FFD700'},
-        ball: {radius: 5,color: '#FFFFFF'}
+        paddle: {width: 100,height: 10,color: '#FFFFFF'},
+        ball: {radius: 5, color: '#FFFFFF'}
     });
 });
 
@@ -36,9 +36,9 @@ class Breakout {
         this.leftKey = false;
         this.rightKey = false;
 
-        this.paddle = new Paddle(options.paddle.width,options.paddle.height,options.paddle.color);
+        this.paddle = new Paddle(options.paddle.width, options.paddle.height, options.paddle.color);
 
-        this.paddle.setPosition(Breakout.width / 2,Breakout.height * 8 / 9);
+        this.paddle.setPosition(Breakout.width / 2, Breakout.height * 8 / 9);
         this.paddle.setSpeed(Breakout.width / 100);
 
         this.ball = new Ball(options.ball.radius, options.ball.color);
@@ -95,19 +95,19 @@ class Entity {
     }
 
     getCornerPoints() {
-        return[{x: this.x-this.width/2,y: this.y-this.height/2},
-                {x: this.x+this.width/2,y: this.y-this.height/2},
-                {x: this.x+this.width/2,y: this.y+this.height/2},
-                {x: this.x-this.width/2,y: this.y+this.height/2}
+        return [
+            {x: this.x - this.width / 2, y: this.y - this.height / 2},
+            {x: this.x + this.width / 2, y: this.y - this.height / 2},
+            {x: this.x + this.width / 2, y: this.y + this.height / 2},
+            {x: this.x - this.width / 2, y: this.y + this.height / 2}
         ]
     }
 
-    hit(){
+    hit() {
     }
-
 }
 
-class Paddle extends Entity{
+class Paddle extends Entity {
     constructor(width, height, color) {
         super();
         this.width = width;
@@ -123,10 +123,12 @@ class Paddle extends Entity{
 
         context.translate(this.x, this.y);
         context.fillStyle = this.color;
-        context.fillRect(-(this.width / 2), -(this.height / 2),this.width, this.height);
+        context.fillRect(-(this.width / 2), -(this.height / 2),
+            this.width, this.height);
 
         context.restore();
     }
+
 
     setPosition(x, y) {
         this.x = x;
@@ -173,9 +175,10 @@ class Ball {
     }
 
     addTarget(object) {
-        if(Array.isArray(object)) {
-            this.targetList.contact(object);
-        } else {
+        if (Array.isArray(object)) {
+            this.targetList.concat(object);
+        }
+        else {
             this.targetList.push(object);
         }
     }
@@ -195,7 +198,7 @@ class Ball {
         this.x += this.dx;
         this.y += this.dy;
 
-        if(this.collision()) {
+        if (this.collision()) {
             this.dy *= -1;
         }
     }
@@ -204,25 +207,27 @@ class Ball {
         let isCollision = false;
         this.targetList.forEach((target) => {
             const points = target.getCornerPoints();
-            points.forEach((point) =>{
-                const a = Math.sqrt(Math.pow(this.x-point.x,2)+Math.pow(this.y-pointy,2));
-                if(a <= this.radius) {
+            points.forEach((point) => {
+                const a = Math.sqrt(
+                    Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2));
+                if (a <= this.radius) {
                     isCollision = true;
                     target.hit();
                 }
-            },this);
+            }, this);
 
             const bl = this.x - this.radius;
             const br = this.x + this.radius;
             const bt = this.y - this.radius;
             const bb = this.y + this.radius;
-            if(points[0].x < br && bl < points[1].x) {
-                if(points[0].y < bb && bt < points[2].y) {
+            if (points[0].x < br && bl < points[1].x) {
+                if (points[0].y < bb && bt < points[2].y) {
+                    //console.log(bl, br, bt, bb, points[0].x, points[1].x, points[0].y, points[2].y)
                     isCollision = true;
                     target.hit();
                 }
             }
-        },this);
+        }, this);
         return isCollision;
     }
 
@@ -275,6 +280,4 @@ class Ball {
 
         context.restore();
     }
-
-
 }
