@@ -267,6 +267,23 @@ class Ball {
         return isCollision;
     }
 
+    changeAngle(ccw = false){
+        let theta = Math.atan(this.dy / this.dx);
+        const speed = this.dx / Math.cos(theta);
+        if(ccw){
+            theta -= Math.PI * 5 / 180;
+        }
+        else{
+            theta += Math.PI * 5 / 180;
+        }
+
+        if(theta <= -0.7853981634 || theta >= 0.5235987756){
+            return;
+        }
+        this.dx = Math.cos(theta) * speed;
+        this.dy = Math.sin(theta) * speed;
+    }
+
     fixPosition() {
         const left = this.x - this.radius;
         if (left < 0) {
