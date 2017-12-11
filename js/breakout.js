@@ -194,7 +194,6 @@ class Paddle extends Entity {
         }
         if(this.x - this.width / 4 > ball.x){
             ball.changeAngle(true);
-
         }
     }
 }
@@ -257,7 +256,6 @@ class Ball {
             const bb = this.y + this.radius;
             if (points[0].x < br && bl < points[1].x) {
                 if (points[0].y < bb && bt < points[2].y) {
-                    //console.log(bl, br, bt, bb, points[0].x, points[1].x, points[0].y, points[2].y)
                     isCollision = true;
                     this.y -= bb - points[0].y;
                     target.hit(this);
