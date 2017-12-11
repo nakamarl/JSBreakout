@@ -28,7 +28,7 @@ class Breakout {
     }
 
     static get isGameOver() {
-        return Breakout._game_over == true;
+        return Breakout._game_over === true;
     }
 
     static setGameOver(f) {
