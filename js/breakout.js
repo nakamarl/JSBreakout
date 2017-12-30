@@ -1,5 +1,4 @@
 window.addEventListener('DOMContentLoaded', () => {
-    // 初期化
     const canvas = document.getElementById('board');
     new Breakout({
         canvas: canvas,
@@ -313,7 +312,10 @@ class Ball extends Entity {
     }
 
     removeTarget(object) {
+        let count = parseInt(document.getElementById('score').innerHTML, 10);
         this.targetList.splice(this.targetList.indexOf(object), 1);
+        count += 1;
+        document.getElementById('score').innerHTML = count;
     }
 
     setPosition(x, y) {
@@ -348,7 +350,6 @@ class Ball extends Entity {
                 return false;
             }
 
-            // 各側面のチェック
             if (target.left < this.right && this.left < target.right) {
                 if (target.top < this.bottom && this.top < target.bottom) {
                     target.hit(this);
@@ -370,10 +371,6 @@ class Ball extends Entity {
         return collideSide;
     }
 
-
-    /**
-     * 反射角度を変える(5度)
-     */
     changeAngle(ccw = false) {
         let theta = Math.atan(this.dy / this.dx);
         const speed = this.dx / Math.cos(theta);
@@ -384,7 +381,6 @@ class Ball extends Entity {
         }
 
         if (theta <= -0.7853981634 || theta >= 0.5235987756) {
-            // 変更なしにする
             return;
         }
         this.dx = Math.cos(theta) * speed;
