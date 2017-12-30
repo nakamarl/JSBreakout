@@ -112,34 +112,43 @@ class Breakout {
 }
 
 class Entity {
-    constructor() {
-        this.x = 0;
-        this.y = 0;
-        this.width = 0;
-        this.height = 0;
+    get left() {
+        return this.x - this.width / 2;
     }
 
-    getCornerPoints() {
-        return [
-            {x: this.x - this.width / 2, y: this.y - this.height / 2},
-            {x: this.x + this.width / 2, y: this.y - this.height / 2},
-            {x: this.x + this.width / 2, y: this.y + this.height / 2},
-            {x: this.x - this.width / 2, y: this.y + this.height / 2}
-        ]
+    get top() {
+        return this.y - this.height / 2;
+    }
+
+    get right() {
+        return this.x + this.width / 2;
+    }
+
+    get bottom() {
+        return this.y + this.height / 2;
+    }
+
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+}
+
+class Collideable extends Entity {
+    constructor(x, y, width, height) {
+        super(x, y, width, height);
     }
 
     hit(ball) {
     }
 }
 
-class Paddle extends Entity {
+class Paddle extends Collideable {
     constructor(width, height, color) {
-        super();
-        this.width = width;
-        this.height = height;
+        super(0, 0, width, height);
         this.color = color;
-        this.x = 0;
-        this.y = 0;
         this.speed = 0;
     }
 
@@ -223,16 +232,12 @@ class Block extends Entity {
     }
 
     constructor(manager, x, y, width, height, color) {
-        super();
+        super(x, y, width, height);
         this.manager = manager;
-        this.width = width;
-        this.height = height;
         if (color >= Block.colorSet.length) {
             color = Block.colorSet.length - 1;
         }
         this.color = Block.colorSet[color];
-        this.x = x;
-        this.y = y;
     }
 
     draw(context) {
@@ -287,12 +292,11 @@ class BlockManager {
     }
 }
 
-class Ball {
+class Ball extends Entity {
     constructor(radius, color) {
+        super(0, 0, radius * 2, radius * 2);
         this.radius = radius;
         this.color = color;
-        this.x = 0;
-        this.y = 0;
         this.dx = 0;
         this.dy = 0;
         this.targetList = [];
@@ -328,43 +332,48 @@ class Ball {
         this.x += this.dx;
         this.y += this.dy;
 
-        if (this.collision()) {
+        const side = this.collision();
+        if ((side & 0x01) !== 0) {
+            this.dx *= -1;
+        }
+        if ((side & 0x02) !== 0) {
             this.dy *= -1;
         }
     }
 
     collision() {
-        let isCollision = false;
+        let collideSide = 0;
         this.targetList.forEach((target) => {
-            if (isCollision) {
+            if (collideSide !== 0) {
                 return false;
             }
-            const points = target.getCornerPoints();
-            points.forEach((point) => {
-                const a = Math.sqrt(Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2));
-                if (a <= this.radius) {
-                    isCollision = true;
-                    target.hit(this);
-                }
-            }, this);
 
-            if (isCollision) {
-                return false;
-            }
-            const bl = this.x - this.radius;
-            const br = this.x + this.radius;
-            const bt = this.y - this.radius;
-            const bb = this.y + this.radius;
-            if (points[0].x < br && bl < points[1].x) {
-                if (points[0].y < bb && bt < points[2].y) {
-                    isCollision = true;
+            // 各側面のチェック
+            if (target.left < this.right && this.left < target.right) {
+                if (target.top < this.bottom && this.top < target.bottom) {
                     target.hit(this);
+                    const distanceLeft = Math.abs(target.left - this.right);
+                    const distanceTop = Math.abs(target.top - this.bottom);
+                    const distanceRight = Math.abs(target.right - this.left);
+                    const distanceBottom = Math.abs(target.bottom - this.top);
+                    const min = Math.min(distanceLeft, distanceTop, distanceRight, distanceBottom);
+
+                    if (min === distanceLeft || min === distanceRight) {
+                        collideSide += 1;
+                    }
+                    if (min === distanceTop || min === distanceBottom) {
+                        collideSide += 2;
+                    }
                 }
             }
         }, this);
-        return isCollision;
+        return collideSide;
     }
 
+
+    /**
+     * 反射角度を変える(5度)
+     */
     changeAngle(ccw = false) {
         let theta = Math.atan(this.dy / this.dx);
         const speed = this.dx / Math.cos(theta);
